@@ -2,6 +2,8 @@
 
 This document outlines the strategies the NeptuneVM code will use for error handling.
 
+Exceptions are not outright disabled, however the NeptuneVM code does not use exceptions for error handling.
+
 ## Recoverable Errors
 
 `absl::Status` and `absl::StatusOr<T>` are used for handling recoverable errors.
@@ -14,9 +16,9 @@ Once called, Panic() will output the given (formatted) message, then exit fast w
 
 ## Assertions/(Pre|Post)conditions
 
-NeptuneVM code has two main assertion systems, which are used to assert pre/postconditions:
+NeptuneVM code has two assertion systems, which are used to assert pre/postconditions:
 
 - `NEPTUNEVM_ASSERT(expr)`/`NEPTUNEVM_VERIFY()`
-    - These simply Panic() if the assertion fails. VERIFY() is always active, even in Release/optimized builds. These should only be used if violation of the pre/postcondition is fatal. If it is not
+    - These simply Panic() if the assertion fails. VERIFY() is always active, even in Release/optimized builds. These should only be used if violation of the pre/postcondition is fatal. If it is not, then use...
 - `NEPTUNEVM_CHECK(expr, ErrorStatement...)`
-    - This will run a user-defined error statement on assertion failure, and is always active, regardless of build type.
+    - ... which will run a user-defined error statement on assertion failure, regardless of build type.
