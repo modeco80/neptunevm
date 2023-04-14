@@ -1,0 +1,10 @@
+/build
+/.vs
+/.vscode
+/out
+
+# for now
+/src/agent
+
+# python module cache
+tools/**/__pycache__
