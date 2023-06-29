@@ -1,20 +1,17 @@
 
-#include <base/CommonTypes.hpp>
 #include <spdlog/spdlog.h>
+#include <base/CommonTypes.hpp>
 
 #ifdef NEPTUNEVM_DEBUG
-#include <absl/debugging/stacktrace.h>
-#include <absl/debugging/symbolize.h>
+#	include <absl/debugging/stacktrace.h>
+#	include <absl/debugging/symbolize.h>
 #endif
 
 namespace {
-
 	inline pid_t GetPanicTid() {
 		return static_cast<pid_t>(syscall(SYS_gettid));
 	}
-
-
-}
+} // namespace
 
 namespace neptunevm {
 	namespace detail {
@@ -26,15 +23,16 @@ namespace neptunevm {
 				spdlog::critical("Thread {} paniced: {}", GetPanicTid(), message);
 
 #ifdef NEPTUNEVM_DEBUG
-			constexpr auto PANIC_MAX_FRAMES = 32;
-			constexpr auto PANIC_MAX_FN_SIZE = 256;
+			constexpr auto PANIC_MAX_FRAMES = 64;
+			constexpr auto PANIC_MAX_FN_SIZE = 512;
 
-			void* stack[PANIC_MAX_FRAMES]{};
+			static void* stack[PANIC_MAX_FRAMES] {};
+			static char symbolized_name[PANIC_MAX_FN_SIZE] {};
+
 			auto stack_size = absl::GetStackTrace(&stack[0], PANIC_MAX_FRAMES, 2);
 
 			spdlog::critical("Stack trace:");
 			for(auto i = 0; i <= stack_size - 1; ++i) {
-				char symbolized_name[PANIC_MAX_FN_SIZE]{};
 				if(absl::Symbolize(stack[i], &symbolized_name[0], PANIC_MAX_FN_SIZE)) {
 					spdlog::critical("    {}    {}", stack[i], symbolized_name);
 				} else {
@@ -43,9 +41,8 @@ namespace neptunevm {
 			}
 #endif
 
-			std::quick_exit(4004); 
+			std::quick_exit(4004);
 		}
-	}
+	} // namespace detail
 
-
-}
+} // namespace neptunevm

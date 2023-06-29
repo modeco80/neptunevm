@@ -1,47 +1,36 @@
-## Saparid config
+## Neptuned config
 
-Use capnp text format?
+```toml
+[neptuned]
+# The IP address to listen on.
+# It is reccomended to set this to `::1`
+# or `127.0.0.1`.
+listen_address = "127.0.0.1"
 
-```capnp
-# This is an example saparid configuration file
+# The port neptuned will listen for http on.
+# WebRTC sessions do not use a fixed port.
+listen_port = 5126
 
-using Neptuned = import "Neptuned.capnp";
+# This is where VM data (images, firmware files) will be put
+vm_data_dir = "/srv/neptune/"
 
-# This will define the configuration for saparid to use
-const config :Saparid.Config = (
+# Path to the JWT secret data to use.
+# This file should be kept secret.
+jwt_secret_path = "/etc/neptune/jwt_secret.bin"
 
-	# The IP address to listen on
-	listen = "0.0.0.0",
+# This defines the MariaDB database connection
+# `unix:` uses unix sockets @ the default MariaDB path
+# A functioning MariaDB database is required to host NeptuneVM
+[neptuned.database]
+connection = "unix:"
+username = "neptune"
+password = "neptuneSecret"
+database_name = "neptune"
 
-	# The base port of the saparid server. Unless manually overridden,
-	# each world will take (base + list_index).
-	basePort = 5126,
-
-	# this is where a SAPARi client distribution is expected to be,
-	# to grab the required VRML files. (IDEA ONLY)
-	#clientRoot = "/srv/sapari",
-
-	# Finally, this defines the worlds your saparid instance will host.
-	# You can host several worlds on even commodity hardware, but 
-	# this is only reccomended for larger servers.
-	#
-	# Small servers can stick to a single-world setup and be fine.
-	worlds = [
-		# Define one world. This will be hosted on :5126
-		( world_path = "worlds/test.wrl", maxclients = 100 )
-	]
-
-);
+# WebRTC configuration
+[neptuned.webrtc]
+# STUN servers to use
+stun_servers = [
+	"stun.l.google.com:19302"
+]
 ```
-
-Advantages:
-- Fairly easy to work with
-- Doesn't require consuming another library
-
-
-
-Disadvantages:
-- Needs importing capnp
-	- though for plans I have I'll have to do this anyways so this is more of a thing than a problem
-- capnp text format may be unfamilar
-	- it is fairly easy to read though
